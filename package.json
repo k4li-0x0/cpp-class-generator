@@ -12,6 +12,7 @@
   "categories": [
     "Other"
   ],
+  "publisher": "k4li",
   "activationEvents": [
     "onCommand:cpp-class-generator.createClass"
   ],
