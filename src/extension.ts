@@ -35,6 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('cpp-class-generator is now active!');
 
 	let disposable = vscode.commands.registerCommand('cpp-class-generator.createClass', async (path:vscode.Uri) => { // Code
+		// TODO: Refactor
 		let config = vscode.workspace.getConfiguration("cpp-class-generator");
 		let username = String(config.get("user.name"));
 		let copyright = processString(String(config.get("project.copyright")), username);
@@ -93,6 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
 				encoder.encode(headerfile)
 			)
 		}
+		vscode.window.showInformationMessage("Done!");
 	});
 
 	context.subscriptions.push(disposable);

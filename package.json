@@ -1,107 +1,110 @@
 {
   "name": "cpp-class-generator",
-	"displayName": "VS Code C++ class generation tool",
-	"description": "Generate files for C++ class",
-	"version": "0.0.1",
-	"engines": {
-		"vscode": "^1.50.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-        "onCommand:cpp-class-generator.createClass"
-	],
-	"main": "./out/extension.js",
-	"contributes": {
-		"menus": {
-			"explorer/context": [
-				{
-					"when": "explorerResourceIsFolder",
-					"command": "cpp-class-generator.createClass",
-					"group": "File"
-				}
-			]
-		},
-		"commands": [
-			{
-			  "command": "cpp-class-generator.createClass",
-			  "title": "Generate C++ class files",
-			  "when": "false"
-			}
-		],
-		"configuration": {
-			"title": "C++ class files generator",
-			"properties": {
-				"cpp-class-generator.user.name" : {
-					"type" : "string",
-					"default" : "${env:USERNAME}",
-					"description": "Username for copyright"
-				},
-				"cpp-class-generator.project.copyright" : {
-					"type" : "string",
-					"default" : "Created by <%userName%> on <%date%>",
-					"description": "Files copyright"
-				},
-				"cpp-class-generator.templates.header-extension" : {
-					"type" : "string",
-					"enum": [
-						".h",
-						".hpp"
-					],
-					"default": ".h",
-					"description": "Header file extension"
-				},
-				"cpp-class-generator.templates.single-header-extension" : {
-					"type" : "string",
-					"enum": [
-						".h",
-						".hpp"
-					],
-					"default": ".hpp",
-					"description": "Single header file extension"
-				},
-				"cpp-class-generator.templates.source-extension" : {
-					"type" : "string",
-					"enum": [
-						".cpp",
-						".cxx"
-					],
-					"default": ".cpp",
-					"description": "Source code file extension"
-				},
-				"cpp-class-generator.templates.header" : {
-					"type" : "string",
-					"default": "//\n// <%copyright%>\n//\n#pragma once\n\n<%namespaceStart%>\n \t// <%className%> \n\tclass <%className%> {\n\t};\n<%namespaceEnd%> \n",
-					"description": "Header file template"
-				},
-				"cpp-class-generator.templates.source" : {
-					"type" : "string",
-					"default": "//\n// <%copyright%>\n//\n#include <%headerFileName%>\n\n",
-					"description": "Source code file template"
-				}
-			}
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile && npm run lint",
-		"lint": "eslint src --ext ts",
-		"test": "node ./out/test/runTest.js"
-	},
-	"devDependencies": {
-		"@types/vscode": "^1.50.0",
-		"@types/glob": "^7.2.0",
-		"@types/mocha": "^9.1.1",
-		"@types/node": "16.x",
-		"@typescript-eslint/eslint-plugin": "^5.30.0",
-		"@typescript-eslint/parser": "^5.30.0",
-		"eslint": "^8.18.0",
-		"glob": "^8.0.3",
-		"mocha": "^10.0.0",
-		"typescript": "^4.7.4",
-		"@vscode/test-electron": "^2.1.5"
-	}
+  "displayName": "VS Code C++ class generation tool",
+  "description": "Generate files for C++ class",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "repository": {
+	  "url": "https://github.com/k4li-0x0/cpp-class-generator"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:cpp-class-generator.createClass"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "cpp-class-generator.createClass",
+          "group": "File"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "cpp-class-generator.createClass",
+        "title": "Generate C++ class files",
+        "when": "false"
+      }
+    ],
+    "configuration": {
+      "title": "C++ class files generator",
+      "properties": {
+        "cpp-class-generator.user.name": {
+          "type": "string",
+          "default": "${env:USERNAME}",
+          "description": "Username for copyright"
+        },
+        "cpp-class-generator.project.copyright": {
+          "type": "string",
+          "default": "Created by <%userName%> on <%date%>",
+          "description": "Files copyright"
+        },
+        "cpp-class-generator.templates.header-extension": {
+          "type": "string",
+          "enum": [
+            ".h",
+            ".hpp"
+          ],
+          "default": ".h",
+          "description": "Header file extension"
+        },
+        "cpp-class-generator.templates.single-header-extension": {
+          "type": "string",
+          "enum": [
+            ".h",
+            ".hpp"
+          ],
+          "default": ".hpp",
+          "description": "Single header file extension"
+        },
+        "cpp-class-generator.templates.source-extension": {
+          "type": "string",
+          "enum": [
+            ".cpp",
+            ".cxx"
+          ],
+          "default": ".cpp",
+          "description": "Source code file extension"
+        },
+        "cpp-class-generator.templates.header": {
+          "type": "string",
+          "default": "//\n// <%copyright%>\n//\n#pragma once\n\n<%namespaceStart%>\n \t// <%className%> \n\tclass <%className%> {\n\t};\n<%namespaceEnd%> \n",
+          "description": "Header file template"
+        },
+        "cpp-class-generator.templates.source": {
+          "type": "string",
+          "default": "//\n// <%copyright%>\n//\n#include <%headerFileName%>\n\n",
+          "description": "Source code file template"
+        }
+      }
+    }
+  },
+  "scripts": {
+	"vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.2.0",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.50.0",
+    "@typescript-eslint/eslint-plugin": "^5.30.0",
+    "@typescript-eslint/parser": "^5.30.0",
+    "@vscode/test-electron": "^2.1.5",
+    "esbuild": "^0.14.49",
+    "eslint": "^8.18.0",
+    "glob": "^8.0.3",
+    "mocha": "^10.0.0",
+    "typescript": "^4.7.4"
+  }
 }
