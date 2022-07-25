@@ -2,7 +2,7 @@
   "name": "cpp-class-generator",
   "displayName": "VS Code C++ class generation tool",
   "description": "Generate files for C++ class",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.50.0"
   },
@@ -16,7 +16,7 @@
   "activationEvents": [
     "onCommand:cpp-class-generator.createClass"
   ],
-  "main": "./out/extension.js",
+  "main": "./out/main.js",
   "contributes": {
     "menus": {
       "explorer/context": [
@@ -38,20 +38,21 @@
       "title": "C++ class files generator",
       "properties": {
         "cpp-class-generator.user.name": {
-          "type": "string",
-          "default": "${env:USERNAME}",
+          "type": ["string", "null"],
+          "default": null,
           "description": "Username for copyright"
         },
         "cpp-class-generator.project.copyright": {
           "type": "string",
-          "default": "Created by <%userName%> on <%date%>",
+          "default": "//\n// Created by <%userName%> on <%date%> \n//",
           "description": "Files copyright"
         },
         "cpp-class-generator.templates.header-extension": {
           "type": "string",
           "enum": [
             ".h",
-            ".hpp"
+            ".hpp",
+            ".hh"
           ],
           "default": ".h",
           "description": "Header file extension"
@@ -60,7 +61,8 @@
           "type": "string",
           "enum": [
             ".h",
-            ".hpp"
+            ".hpp",
+            ".hh"
           ],
           "default": ".hpp",
           "description": "Single header file extension"
@@ -69,14 +71,15 @@
           "type": "string",
           "enum": [
             ".cpp",
-            ".cxx"
+            ".cxx",
+            ".cc"
           ],
           "default": ".cpp",
           "description": "Source code file extension"
         },
         "cpp-class-generator.templates.header": {
           "type": "string",
-          "default": "//\n// <%copyright%>\n//\n#pragma once\n\n<%namespaceStart%>\n \t// <%className%> \n\tclass <%className%> {\n\t};\n<%namespaceEnd%> \n",
+          "default": "<%copyright%>\n#pragma once\n\n<%namespaceStart%>\n <%namespaceTab%>// <%className%> \n<%namespaceTab%>class <%className%> {\n<%namespaceTab%>};\n<%namespaceEnd%> \n",
           "description": "Header file template"
         },
         "cpp-class-generator.templates.source": {

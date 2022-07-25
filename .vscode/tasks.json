@@ -5,16 +5,11 @@
 	"tasks": [
 		{
 			"type": "npm",
-			"script": "watch",
-			"problemMatcher": "$tsc-watch",
-			"isBackground": true,
-			"presentation": {
-				"reveal": "never"
-			},
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
+			"script": "esbuild-watch",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: esbuild-watch",
+			"detail": "npm run esbuild-base -- --sourcemap --watch"
 		}
 	]
 }
