@@ -11,35 +11,43 @@ import * as vscode from 'vscode';
 
 const gClock: Date = new Date();
 
-function getDate(): string {
-	return `${gClock.getDate()}.${gClock.getMonth()}.${gClock.getFullYear()}`;
-}
-
-
-// Return text with replaced variables
-function processString(source: string, username ? : string, copyright ? : string, namespaceName ? : string, className ? : string, headerName ? : string): string {
-	let result = source;
-	result = result.replace(/<%userName%>/g, username!);
-	result = result.replace(/<%copyright%>/g, copyright!);
-	result = result.replace(/<%date%>/g, getDate());
-	if (namespaceName! !== "") {
-		result = result.replace(/<%namespaceStart%>/g, `namespace ${namespaceName!} {`);
-		result = result.replace(/<%namespaceEnd%>/g, `} // ${namespaceName!}`);
-		result = result.replace(/<%namespaceTab%>/g, "\t");
-	} else {
-		result = result.replace(/<%namespaceStart%>/g, "");
-		result = result.replace(/<%namespaceEnd%>/g, "");
-		result = result.replace(/<%namespaceTab%>/g, "");
-	}
-	result = result.replace(/<%className%>/g, className!);
-	result = result.replace(/<%headerFileName%>/g, headerName!);
-	return result;
-}
-
 class FileFactory
 {
 	private static encoder = new TextEncoder();
 	private static config = vscode.workspace.getConfiguration("cpp-class-generator");
+
+	private getDate(): string {
+		let date:string = String(FileFactory.config.get("templates.date-format"));
+		let yyyy = gClock.getFullYear().toString();
+		let yy = yyyy.slice(yyyy.length - 2);
+		let mm = gClock.getMonth().toString().padStart(2, '0');
+		let dd = gClock.getDate().toString().padStart(2, '0');
+		date = date.replace("YYYY", yyyy);
+		date = date.replace("YY", yy);
+		date = date.replace("MM", mm);
+		date = date.replace("DD", dd);
+		return date;
+	}
+	
+	private processString(source: string, username ? : string, copyright ? : string, namespaceName ? : string, className ? : string, headerName ? : string): string {
+		let result = source;
+		result = result.replace(/<%userName%>/g, username!);
+		result = result.replace(/<%copyright%>/g, copyright!);
+		result = result.replace(/<%date%>/g, this.getDate());
+		if (namespaceName! !== "") {
+			result = result.replace(/<%namespaceStart%>/g, `namespace ${namespaceName!} {`);
+			result = result.replace(/<%namespaceEnd%>/g, `} // ${namespaceName!}`);
+			result = result.replace(/<%namespaceTab%>/g, "\t");
+		} else {
+			result = result.replace(/<%namespaceStart%>/g, "");
+			result = result.replace(/<%namespaceEnd%>/g, "");
+			result = result.replace(/<%namespaceTab%>/g, "");
+		}
+		result = result.replace(/<%className%>/g, className!);
+		result = result.replace(/<%headerFileName%>/g, headerName!);
+		return result;
+	}
+	
 
 	private ProcessFile(path: string, fileName: string, fileExtension: string, content: string) {
 		vscode.workspace.fs.writeFile(
@@ -92,7 +100,7 @@ class FileFactory
 		{
 			userName = userInfo().username;
 		}
-		let copyright = processString(this.GetConfigParamAsString("project.copyright"), userName);
+		let copyright = this.processString(this.GetConfigParamAsString("project.copyright"), userName);
 		let fullClassNameInput = await this.PrettyInputBox("Class name", "Enter class name (e.g. SomeClass / MyNamespace::MyOtherNamespace::SomeClass)"); /*await vscode.window.showInputBox({
 			"placeHolder": "ClassName",
 			"prompt": "Enter class name (e.g. SomeClass / MyNamespace::MyOtherNamespace::SomeClass)",
@@ -135,15 +143,15 @@ class FileFactory
 
 		// Create files
 		if (!isSingleFile) {
-			let headerfile = processString(this.GetConfigParamAsString("templates.header"), userName, copyright, namespaceName, className, `<${filename}${headerExt}>`);
+			let headerfile = this.processString(this.GetConfigParamAsString("templates.header"), userName, copyright, namespaceName, className, `"${filename}${headerExt}"`);
 			this.ProcessFile(path.path, filename, headerExt, headerfile);
-			let sourcefile = processString(this.GetConfigParamAsString("templates.source"), userName, copyright, namespaceName, className, `<${filename}${sourceExt}>`);
+			let sourcefile = this.processString(this.GetConfigParamAsString("templates.source"), userName, copyright, namespaceName, className, `"${filename}${headerExt}"`);
 			this.ProcessFile(path.path, filename, sourceExt, sourcefile);
 		} else {
-			let headerfile = processString(this.GetConfigParamAsString("templates.header"), userName, copyright, namespaceName, className, `<${filename}${singleHeaderExt}>`);
+			let headerfile = this.processString(this.GetConfigParamAsString("templates.header"), userName, copyright, namespaceName, className, `"${filename}${singleHeaderExt}"`);
 			this.ProcessFile(path.path, filename, singleHeaderExt, headerfile);
 		}
-		vscode.window.showInformationMessage("Done!");
+		vscode.window.showInformationMessage("C++ class generator: Done!");
 	}
 };
 

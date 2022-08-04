@@ -37,3 +37,16 @@
 
 - [Issue#1](https://github.com/k4li-0x0/cpp-class-generator/issues/1)
 - [Issue#2](https://github.com/k4li-0x0/cpp-class-generator/issues/2)
+
+## [v0.1.1b] - 04.08.2022
+
+### Added
+- cpp-class-generator.templates.date-format param
+
+### Changed
+
+- Operation end message changed to "C++ class generator: Done"
+
+### Fixed
+
+- [Issue#4](https://github.com/k4li-0x0/cpp-class-generator/issues/4)
