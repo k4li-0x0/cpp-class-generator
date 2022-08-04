@@ -6,7 +6,7 @@ Explorer -> RMB on folder -> Generate files for C++ class
 
 <%userName%> - cpp-class-generator.user.name or system username
 
-<%date%> - current date dd/mm/yyyy
+<%date%> - current date 
 
 <%copyright%> - cpp-class-generator.project.copyright
 
@@ -14,31 +14,21 @@ Explorer -> RMB on folder -> Generate files for C++ class
 
 <%namespaceEnd%> - namespace end is `} // NamespaceName`
 
-<%namespaceTab%> - automatic namespace content tabulation. If there is no namespace tabulation, no tab will be added
+<%namespaceTab%> - automatic namespace content tabulation. If there is no namespace, no tab will be added
 
 <%className%> - specified class name
 
 <%headerFileName%> - specified name with header extension
 
-## Current version - [v0.1.0b]
+## Current version - [v0.1.1b]
 
 ### Added
-
-- FileFactory class
-- <%namespaceTab%> tag for namespace tabulation
+- cpp-class-generator.templates.date-format param
 
 ### Changed
 
-- cpp-class-generator.templates.copyright now contains the full comment
-- cpp-class-generator.tmeplates.header: removed comments from the beginning
-- cpp-class-generator.templates.single-header-extension: added .hh
-- cpp-class-generator.templates.header-extension: added .hh
-- cpp-class-generator.templates.source-extension: added .cc
-- code structure completely changed
+- Operation end message changed to "C++ class generator: Done"
 
-### Fixed 
+### Fixed
 
-- [Issue#1](https://github.com/k4li-0x0/cpp-class-generator/issues/1)
-- [Issue#2](https://github.com/k4li-0x0/cpp-class-generator/issues/2)
-
-
+- [Issue#4](https://github.com/k4li-0x0/cpp-class-generator/issues/4)

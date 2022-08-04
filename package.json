@@ -47,6 +47,31 @@
           "default": "//\n// Created by <%userName%> on <%date%> \n//",
           "description": "Files copyright"
         },
+        "cpp-class-generator.templates.date-format": {
+          "type": "string",
+          "enum": [
+            "DD-MM-YYYY",
+            "MM-DD-YYYY",
+            "YYYY-MM-DD",
+            "DD-MM-YY",
+            "MM-DD-YY",
+            "YY-MM-DD",
+            "DD/MM/YYYY",
+            "MM/DD/YYYY",
+            "YYYY/MM/DD",
+            "DD/MM/YY",
+            "MM/DD/YY",
+            "YY/MM/DD",
+            "DD.MM.YYYY",
+            "MM.DD.YYYY",
+            "YYYY.MM.DD",
+            "DD.MM.YY",
+            "MM.DD.YY",
+            "YY.MM.DD"
+          ],
+          "default": "DD.MM.YYYY",
+          "description": "File date format"
+        },
         "cpp-class-generator.templates.header-extension": {
           "type": "string",
           "enum": [
@@ -84,7 +109,7 @@
         },
         "cpp-class-generator.templates.source": {
           "type": "string",
-          "default": "//\n// <%copyright%>\n//\n#include <%headerFileName%>\n\n",
+          "default": "<%copyright%>\n#include <%headerFileName%>\n\n",
           "description": "Source code file template"
         }
       }
