@@ -50,3 +50,9 @@
 ### Fixed
 
 - [Issue#4](https://github.com/k4li-0x0/cpp-class-generator/issues/4)
+
+## Small update - [v0.1.2b] - 04.08.2022
+
+### Added
+
+- Extension icon

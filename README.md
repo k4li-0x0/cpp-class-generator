@@ -32,3 +32,9 @@ Explorer -> RMB on folder -> Generate files for C++ class
 ### Fixed
 
 - [Issue#4](https://github.com/k4li-0x0/cpp-class-generator/issues/4)
+
+### Small update - [v0.1.2b]
+
+### Added
+
+- Extension icon

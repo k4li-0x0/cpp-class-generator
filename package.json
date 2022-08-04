@@ -2,7 +2,8 @@
   "name": "cpp-class-generator",
   "displayName": "VS Code C++ class generation tool",
   "description": "Generate files for C++ class",
-  "version": "0.1.1",
+  "version": "0.1.2",
+  "logo": "images/icon.jpg",
   "engines": {
     "vscode": "^1.50.0"
   },
