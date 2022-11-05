@@ -2,12 +2,13 @@
   "name": "cpp-class-generator",
   "displayName": "VS Code C++ class generation tool",
   "description": "Generate files for C++ class",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "logo": "images/icon.png",
   "engines": {
     "vscode": "^1.50.0"
   },
   "repository": {
-	  "url": "https://github.com/k4li-0x0/cpp-class-generator"
+    "url": "https://github.com/k4li-0x0/cpp-class-generator"
   },
   "categories": [
     "Other"
@@ -38,13 +39,20 @@
       "title": "C++ class files generator",
       "properties": {
         "cpp-class-generator.user.name": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "default": null,
           "description": "Username for copyright"
         },
         "cpp-class-generator.project.copyright": {
-          "type": "string",
-          "default": "//\n// Created by <%userName%> on <%date%> \n//",
+          "type": "array",
+          "default": [
+            "//",
+            "// Created by {userName} on {date} ",
+            "//"
+          ],
           "description": "Files copyright"
         },
         "cpp-class-generator.templates.date-format": {
@@ -103,20 +111,43 @@
           "description": "Source code file extension"
         },
         "cpp-class-generator.templates.header": {
-          "type": "string",
-          "default": "<%copyright%>\n#pragma once\n\n<%namespaceStart%>\n <%namespaceTab%>// <%className%> \n<%namespaceTab%>class <%className%> {\n<%namespaceTab%>};\n<%namespaceEnd%> \n",
+          "type": "array",
+          "default": [
+            "{copyright}",
+            "#pragma once",
+            "",
+            "{namespaceStart}",
+            "{namespaceTab}// {className}",
+            "{namespaceTab}class {className} {",
+            "{namespaceTab}};",
+            "{namespaceEnd}",
+            ""
+          ],
           "description": "Header file template"
         },
         "cpp-class-generator.templates.source": {
-          "type": "string",
-          "default": "<%copyright%>\n#include <%headerFileName%>\n\n",
+          "type": "array",
+          "default": [
+            "{copyright}",
+            "#include \"{headerFileName}\"",
+            ""
+          ],
           "description": "Source code file template"
+        },
+        "cpp-class-generator.templates.default-file-scheme": {
+          "type": "string",
+          "default": "Separated Header/Source files",
+          "enum": [
+            "Separated Header/Source files",
+            "Single file"
+          ],
+          "description": "Default generated file scheme"
         }
       }
     }
   },
   "scripts": {
-	"vscode:prepublish": "npm run esbuild-base -- --minify",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",

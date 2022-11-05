@@ -1,21 +1,44 @@
-# Change Log
+# Changelog
 
-## [Unreleased]
-
-- Initial release
-
-## [V0.0.1a] - 24.07.2022
+## [v1.0.0] - 05.11.2022 (Release 🥳)
 
 ### Added
 
-- cpp-class-generator.user.name param
-- cpp-class-generator.project.copyright param
-- cpp-class-generator.templates.header-extension param
-- cpp-class-generator.templates.single-header-extension param
-- cpp-class-generator.templates.source-extension param
-- cpp-class-generator.templates.header param
-- cpp-class-generator.templates.source param
-- "Generate C++ class files" menu option for folders
+- cpp-class-generator.templates.default-file-scheme config parameter
+
+- "Default" option in generated files scheme pick
+
+### Changed
+
+- Refactored code
+
+- Template parameters are now arrays of strings
+
+### Fixed
+
+- [Issue#7](https://github.com/k4li-0x0/cpp-class-generator/issues/7)
+
+- Icon display
+
+## [v0.1.1b] - 04.08.2022
+
+### Added
+
+- cpp-class-generator.templates.date-format config parameter
+
+### Changed
+
+- Operation end message changed to "C++ class generator: Done"
+
+### Fixed
+
+- [Issue#4](https://github.com/k4li-0x0/cpp-class-generator/issues/4)
+
+## Small update - [v0.1.2b] - 04.08.2022
+
+### Added
+
+- Extension icon
 
 ## [v0.1.0b] - 25.07.2022
 
@@ -38,15 +61,19 @@
 - [Issue#1](https://github.com/k4li-0x0/cpp-class-generator/issues/1)
 - [Issue#2](https://github.com/k4li-0x0/cpp-class-generator/issues/2)
 
-## [v0.1.1b] - 04.08.2022
+## [V0.0.1a] - 24.07.2022
 
 ### Added
-- cpp-class-generator.templates.date-format param
 
-### Changed
+- cpp-class-generator.user.name param
+- cpp-class-generator.project.copyright param
+- cpp-class-generator.templates.header-extension param
+- cpp-class-generator.templates.single-header-extension param
+- cpp-class-generator.templates.source-extension param
+- cpp-class-generator.templates.header param
+- cpp-class-generator.templates.source param
+- "Generate C++ class files" menu option for folders
 
-- Operation end message changed to "C++ class generator: Done"
+## [Unreleased]
 
-### Fixed
-
-- [Issue#4](https://github.com/k4li-0x0/cpp-class-generator/issues/4)
+- Initial release

@@ -11,16 +11,42 @@ import * as vscode from 'vscode';
 
 const gClock: Date = new Date();
 
-class FileFactory
-{
+class FileFactory {
 	private static encoder = new TextEncoder();
 	private static config = vscode.workspace.getConfiguration("cpp-class-generator");
+	private username: string = "User";
+	private copyright: string = "";
+	private namespaceName: string = "";
+	private className: string = "";
+	private headerName: string = "";
+	private sourceName: string = "";
 
-	private getDate(): string {
-		let date:string = String(FileFactory.config.get("templates.date-format"));
+	private static UpdateConfig()
+	{
+		FileFactory.config = vscode.workspace.getConfiguration("cpp-class-generator");
+	}
+
+	private static getParameterFromConfig(name: string): unknown {
+		return FileFactory.config.get(name);
+	}
+
+	private static getStringParameterFromConfig(name: string): string {
+		let result = FileFactory.getParameterFromConfig(name);
+		if (result === null || result === undefined) return "";
+		return String(result);
+	}
+
+	private static getTemplateFromConfig(name: string): string {
+		let result = FileFactory.getParameterFromConfig(name);
+		if (result === null || result === undefined) return "";
+		return (result as Array<any>).join('\n');
+	}
+
+	private static getDate(): string {
+		let date: string = FileFactory.getStringParameterFromConfig("templates.date-format");
 		let yyyy = gClock.getFullYear().toString();
 		let yy = yyyy.slice(yyyy.length - 2);
-		let mm = gClock.getMonth().toString().padStart(2, '0');
+		let mm = (gClock.getMonth() + 1).toString().padStart(2, '0');
 		let dd = gClock.getDate().toString().padStart(2, '0');
 		date = date.replace("YYYY", yyyy);
 		date = date.replace("YY", yy);
@@ -28,48 +54,40 @@ class FileFactory
 		date = date.replace("DD", dd);
 		return date;
 	}
-	
-	private processString(source: string, username ? : string, copyright ? : string, namespaceName ? : string, className ? : string, headerName ? : string): string {
+
+	private processString(source: string, isHeader: boolean = false, isCopyright: boolean = false): string {
 		let result = source;
-		result = result.replace(/<%userName%>/g, username!);
-		result = result.replace(/<%copyright%>/g, copyright!);
-		result = result.replace(/<%date%>/g, this.getDate());
-		if (namespaceName! !== "") {
-			result = result.replace(/<%namespaceStart%>/g, `namespace ${namespaceName!} {`);
-			result = result.replace(/<%namespaceEnd%>/g, `} // ${namespaceName!}`);
-			result = result.replace(/<%namespaceTab%>/g, "\t");
+		result = result.replace(/{userName}/g, this.username);
+		result = result.replace(/{date}/g, FileFactory.getDate());
+		if (isCopyright) return result;
+		result = result.replace(/{copyright}/g, this.copyright);
+		if (this.namespaceName! !== "") {
+			result = result.replace(/{namespaceStart}/g, `namespace ${this.namespaceName} {`);
+			result = result.replace(/{namespaceEnd}/g, `} // ${this.namespaceName}`);
+			result = result.replace(/{namespaceTab}/g, "\t");
 		} else {
-			result = result.replace(/<%namespaceStart%>/g, "");
-			result = result.replace(/<%namespaceEnd%>/g, "");
-			result = result.replace(/<%namespaceTab%>/g, "");
+			result = result.replace(/{namespaceStart}/g, "");
+			result = result.replace(/{namespaceEnd}/g, "");
+			result = result.replace(/{namespaceTab}/g, "");
 		}
-		result = result.replace(/<%className%>/g, className!);
-		result = result.replace(/<%headerFileName%>/g, headerName!);
+		result = result.replace(/{className}/g, this.className);
+		result = result.replace(/{headerFileName}/g, this.headerName);
+		if (isHeader)
+			result = result.replace(/{currentFileName}/g, this.headerName);
+		else
+			result = result.replace(/{currentFileName}/g, this.sourceName);
 		return result;
 	}
-	
 
-	private ProcessFile(path: string, fileName: string, fileExtension: string, content: string) {
+
+	private static ProcessFile(path: string, fileName: string, fileExtension: string, content: string) {
 		vscode.workspace.fs.writeFile(
 			vscode.Uri.file(`${path}/${fileName}${fileExtension}`),
 			FileFactory.encoder.encode(content)
 		)
 	}
 
-	private GetConfigParam(name: string) : unknown
-	{
-		return FileFactory.config.get(name);
-	}
-
-	private GetConfigParamAsString(name: string) : string
-	{
-		let result = this.GetConfigParam(name);
-		if (result === null || result === undefined) return "";
-		return String(FileFactory.config.get(name));
-	}
-
-	private async PrettyInputBox(placeHolder: string, prompt: string, value?: string) : Promise<string>
-	{
+	private static async PrettyInputBox(placeHolder: string, prompt: string, value?: string): Promise<string | void> {
 		let mValue = "";
 		mValue = value!;
 		let result = await vscode.window.showInputBox({
@@ -77,79 +95,80 @@ class FileFactory
 			"prompt": prompt,
 			"value": mValue
 		});
-		if (result === undefined) return "";
 		return result;
 	}
 
-	private async PrettyQuickPick(items: readonly string[] | Thenable<readonly string[]>, options?: vscode.QuickPickOptions) : Promise<string> 
-	{
+	private static async PrettyQuickPick(items: readonly string[] | Thenable<readonly string[]>, options?: vscode.QuickPickOptions): Promise<string | void> {
 		let pick = await vscode.window.showQuickPick(
-			items, 
+			items,
 			options
 		);
-		if (pick === undefined) return "";
-		return pick;
+		return Promise.resolve(pick);
 	}
 
 	/**
 	 * CreateFile
 	 */
 	public async CreateFile(path: vscode.Uri) {
-		let userName = this.GetConfigParamAsString("user.name");
-		if (userName === "")
-		{
-			userName = userInfo().username;
+		FileFactory.UpdateConfig();
+		this.username = FileFactory.getStringParameterFromConfig("user.name");
+		if (this.username === "") {
+			this.username = userInfo().username;
 		}
-		let copyright = this.processString(this.GetConfigParamAsString("project.copyright"), userName);
-		let fullClassNameInput = await this.PrettyInputBox("Class name", "Enter class name (e.g. SomeClass / MyNamespace::MyOtherNamespace::SomeClass)"); /*await vscode.window.showInputBox({
-			"placeHolder": "ClassName",
-			"prompt": "Enter class name (e.g. SomeClass / MyNamespace::MyOtherNamespace::SomeClass)",
-			"value": ""
-		});*/
+		this.copyright = this.processString(FileFactory.getTemplateFromConfig("project.copyright"),false, true);
+		let fullClassNameInput = await FileFactory.PrettyInputBox("Class name", "Enter class name (e.g. SomeClass / MyNamespace::MyOtherNamespace::SomeClass)");
 		if (fullClassNameInput === undefined) return;
 		let fullClassName = String(fullClassNameInput);
-		let namespaceName = "";
-		let className = "";
 		let namespaceSeparatorPos = fullClassName.lastIndexOf("::");
 		if (namespaceSeparatorPos != -1) {
-			namespaceName = fullClassName.slice(0, namespaceSeparatorPos);
-			className = fullClassName.slice(namespaceSeparatorPos + 2, fullClassName.length);
+			this.namespaceName = fullClassName.slice(0, namespaceSeparatorPos);
+			this.className = fullClassName.slice(namespaceSeparatorPos + 2, fullClassName.length);
 		} else {
-			className = fullClassName;
+			this.className = fullClassName;
 		}
-		const filenameInput = await this.PrettyInputBox("Filename", "Enter filename withour extension", className); /*await vscode.window.showInputBox({
-			"placeHolder": "Filename",
-			"prompt": "Enter filename without extension",
-			"value": className
-		});*/
+		const filenameInput = await FileFactory.PrettyInputBox("Filename", "Enter filename without extension", this.className);
 		if (filenameInput === undefined) return;
 		let filename = String(filenameInput);
-		let isSingleFilePick = await this.PrettyQuickPick(
-			["Single file", "Separate Header/Source"], 
+		let isSingleFilePick = await FileFactory.PrettyQuickPick(
+			["Default", "Separated Header/Source files", "Single file"],
 			{
 				canPickMany: false,
 				title: "Choose which files will be created",
 				placeHolder: "One file or two files?"
 			}
 		);
-		if (String(isSingleFilePick) === "") return;
-		let isSingleFile = (String(isSingleFilePick) === "Single file");
+		if ((isSingleFilePick === undefined) ||
+			(isSingleFilePick === "Default"))
+			isSingleFilePick = FileFactory.getStringParameterFromConfig("templates.default-file-scheme");
+		let isSingleFile = (isSingleFilePick === "Single file");
 		let sourcePath = path.path;
 		if (sourcePath === "") return;
 
-		let headerExt = this.GetConfigParamAsString("templates.header-extension");
-		let sourceExt = this.GetConfigParamAsString("templates.source-extension");
-		let singleHeaderExt = this.GetConfigParamAsString("templates.single-header-extension");
+		let headerExt = FileFactory.getStringParameterFromConfig("templates.header-extension");
+		let sourceExt = FileFactory.getStringParameterFromConfig("templates.source-extension");
+		let singleHeaderExt = FileFactory.getStringParameterFromConfig("templates.single-header-extension");
+		this.sourceName = `${filename}${sourceExt}`;
 
 		// Create files
 		if (!isSingleFile) {
-			let headerfile = this.processString(this.GetConfigParamAsString("templates.header"), userName, copyright, namespaceName, className, `"${filename}${headerExt}"`);
-			this.ProcessFile(path.path, filename, headerExt, headerfile);
-			let sourcefile = this.processString(this.GetConfigParamAsString("templates.source"), userName, copyright, namespaceName, className, `"${filename}${headerExt}"`);
-			this.ProcessFile(path.path, filename, sourceExt, sourcefile);
+			let headerFileTemplate = FileFactory.getTemplateFromConfig("templates.header");
+			let sourceFileTemplate = FileFactory.getTemplateFromConfig("templates.source");
+			this.headerName = `${filename}${headerExt}`;
+			let headerfile = this.processString(
+				headerFileTemplate,
+				true);
+			FileFactory.ProcessFile(path.path, filename, headerExt, headerfile);
+			let sourcefile = this.processString(
+				sourceFileTemplate,
+				false);
+			FileFactory.ProcessFile(path.path, filename, sourceExt, sourcefile);
 		} else {
-			let headerfile = this.processString(this.GetConfigParamAsString("templates.header"), userName, copyright, namespaceName, className, `"${filename}${singleHeaderExt}"`);
-			this.ProcessFile(path.path, filename, singleHeaderExt, headerfile);
+			this.headerName = `${filename}${singleHeaderExt}`;
+			let headerFileTemplate = FileFactory.getTemplateFromConfig("templates.header");
+			let headerfile = this.processString(
+				headerFileTemplate,
+				true);
+			FileFactory.ProcessFile(path.path, filename, singleHeaderExt, headerfile);
 		}
 		vscode.window.showInformationMessage("C++ class generator: Done!");
 	}
@@ -158,10 +177,8 @@ class FileFactory
 export function activate(context: vscode.ExtensionContext) {
 	console.log('cpp-class-generator is now active!');
 
-	const factory = new FileFactory;
-
 	let disposable = vscode.commands.registerCommand('cpp-class-generator.createClass', async (path: vscode.Uri) => { // Code
-		// TODO: Refactor
+		let factory = new FileFactory;
 		factory.CreateFile(path);
 	});
 
