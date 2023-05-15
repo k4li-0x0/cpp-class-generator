@@ -125,6 +125,11 @@
           ],
           "description": "Header file template"
         },
+        "cpp-class-generator.templates.header-only": {
+          "type": "array",
+          "default": [],
+          "description": "File template for header-only classes"
+        },
         "cpp-class-generator.templates.source": {
           "type": "array",
           "default": [

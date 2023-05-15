@@ -166,7 +166,8 @@ class FileFactory {
 			FileFactory.ProcessFile(path.path, filename, sourceExt, sourcefile);
 		} else {
 			this.headerName = `${filename}${singleHeaderExt}`;
-			let headerFileTemplate = FileFactory.getTemplateFromConfig("templates.header");
+			let headerFileTemplate = FileFactory.getTemplateFromConfig("templates.header-only");
+			if (headerFileTemplate.length == 0) headerFileTemplate = FileFactory.getTemplateFromConfig("templates.header");
 			let headerfile = this.processString(
 				headerFileTemplate,
 				true);
