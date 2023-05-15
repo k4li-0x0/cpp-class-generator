@@ -65,10 +65,12 @@ class FileFactory {
 			result = result.replace(/{namespaceStart}/g, `namespace ${this.namespaceName} {`);
 			result = result.replace(/{namespaceEnd}/g, `} // ${this.namespaceName}`);
 			result = result.replace(/{namespaceTab}/g, "\t");
+			result = result.replace(/{namespaceScope}/g, `${this.namespaceName}::`);
 		} else {
 			result = result.replace(/{namespaceStart}/g, "");
 			result = result.replace(/{namespaceEnd}/g, "");
 			result = result.replace(/{namespaceTab}/g, "");
+			result = result.replace(/{namespaceScope}/g, "");
 		}
 		result = result.replace(/{className}/g, this.className);
 		result = result.replace(/{headerFileName}/g, this.headerName);

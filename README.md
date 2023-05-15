@@ -20,6 +20,8 @@ Contributions are welcome
 
 {namespaceTab} - automatic namespace content tabulation. If there is no namespace, no tab will be added
 
+{namespaceScope} - inline namespace scope is `NamespaceName::`
+
 {className} - specified class name
 
 {headerFileName} - specified name with header extension
