@@ -11,6 +11,11 @@ import * as vscode from 'vscode';
 
 const gClock: Date = new Date();
 
+interface FileTemplate {
+	string: string;
+	templ: string;
+}
+
 class FileFactory {
 	private static encoder = new TextEncoder();
 	private static config = vscode.workspace.getConfiguration("cpp-class-generator");
@@ -36,10 +41,31 @@ class FileFactory {
 		return String(result);
 	}
 
-	private static getTemplateFromConfig(name: string): string {
+	private static async getTemplateFromConfig(name: string, templ = ""): Promise<FileTemplate> {
 		let result = FileFactory.getParameterFromConfig(name);
-		if (result === null || result === undefined) return "";
-		return (result as Array<any>).join('\n');
+		if (result === null || result === undefined) return { string: "", templ: templ };
+		if (Array.isArray(result)) {
+			if (templ.length != 0) return { string: "", templ: templ };
+			return { string: result.join('\n'), templ: templ };
+		}
+		let templates = new Map<string, Array<any>>(Object.entries(result as Object));
+		if (templ.length == 0) {
+			let templPick = await FileFactory.PrettyQuickPick(
+				Array.from(templates.keys()),
+				{
+					canPickMany: false,
+					title: "Choose class template",
+					placeHolder: "Template for class"
+				}
+			);
+			if (typeof templPick === 'string')
+				templ = templPick;
+			else
+				return { string: "", templ: templ };
+		}
+		let data = templates.get(templ);
+		if (data === null || data === undefined) return { string: "", templ: templ };
+		return { string: data.join('\n'), templ: templ };
 	}
 
 	private static getDate(): string {
@@ -117,7 +143,7 @@ class FileFactory {
 		if (this.username === "") {
 			this.username = userInfo().username;
 		}
-		this.copyright = this.processString(FileFactory.getTemplateFromConfig("project.copyright"),false, true);
+		this.copyright = this.processString((await FileFactory.getTemplateFromConfig("project.copyright")).string,false, true);
 		let fullClassNameInput = await FileFactory.PrettyInputBox("Class name", "Enter class name (e.g. SomeClass / MyNamespace::MyOtherNamespace::SomeClass)");
 		if (fullClassNameInput === undefined) return;
 		let fullClassName = String(fullClassNameInput);
@@ -153,23 +179,31 @@ class FileFactory {
 
 		// Create files
 		if (!isSingleFile) {
-			let headerFileTemplate = FileFactory.getTemplateFromConfig("templates.header");
-			let sourceFileTemplate = FileFactory.getTemplateFromConfig("templates.source");
+			let headerFileTemplate = await FileFactory.getTemplateFromConfig("templates.header");
+			let sourceFileTemplate = await FileFactory.getTemplateFromConfig("templates.source", headerFileTemplate.templ);
+			if (headerFileTemplate.string.length == 0 || sourceFileTemplate.string.length == 0) {
+				vscode.window.showInformationMessage("C++ class not generated: invalid template");
+				return;
+			}
 			this.headerName = `${filename}${headerExt}`;
 			let headerfile = this.processString(
-				headerFileTemplate,
+				headerFileTemplate.string,
 				true);
 			FileFactory.ProcessFile(path.path, filename, headerExt, headerfile);
 			let sourcefile = this.processString(
-				sourceFileTemplate,
+				sourceFileTemplate.string,
 				false);
 			FileFactory.ProcessFile(path.path, filename, sourceExt, sourcefile);
 		} else {
 			this.headerName = `${filename}${singleHeaderExt}`;
-			let headerFileTemplate = FileFactory.getTemplateFromConfig("templates.header-only");
-			if (headerFileTemplate.length == 0) headerFileTemplate = FileFactory.getTemplateFromConfig("templates.header");
+			let headerFileTemplate = await FileFactory.getTemplateFromConfig("templates.header-only");
+			if (headerFileTemplate.string.length == 0) headerFileTemplate = await FileFactory.getTemplateFromConfig("templates.header");
+			if (headerFileTemplate.string.length == 0) {
+				vscode.window.showInformationMessage("C++ class not generated: invalid template");
+				return;
+			}
 			let headerfile = this.processString(
-				headerFileTemplate,
+				headerFileTemplate.string,
 				true);
 			FileFactory.ProcessFile(path.path, filename, singleHeaderExt, headerfile);
 		}
