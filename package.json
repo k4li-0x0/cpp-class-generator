@@ -111,7 +111,7 @@
           "description": "Source code file extension"
         },
         "cpp-class-generator.templates.header": {
-          "type": "array",
+          "type": ["array", "object"],
           "default": [
             "{copyright}",
             "#pragma once",
@@ -126,12 +126,12 @@
           "description": "Header file template"
         },
         "cpp-class-generator.templates.header-only": {
-          "type": "array",
+          "type": ["array", "object"],
           "default": [],
           "description": "File template for header-only classes"
         },
         "cpp-class-generator.templates.source": {
-          "type": "array",
+          "type": ["array", "object"],
           "default": [
             "{copyright}",
             "#include \"{headerFileName}\"",
