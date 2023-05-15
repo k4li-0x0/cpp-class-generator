@@ -67,8 +67,8 @@ class FileFactory {
 			result = result.replace(/{namespaceTab}/g, "\t");
 			result = result.replace(/{namespaceScope}/g, `${this.namespaceName}::`);
 		} else {
-			result = result.replace(/{namespaceStart}/g, "");
-			result = result.replace(/{namespaceEnd}/g, "");
+			result = result.replace(/{namespaceStart}\r?\n?/g, "");
+			result = result.replace(/\r?\n?{namespaceEnd}(\r?\n?)/g, "$1");
 			result = result.replace(/{namespaceTab}/g, "");
 			result = result.replace(/{namespaceScope}/g, "");
 		}
