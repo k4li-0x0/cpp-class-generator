@@ -109,7 +109,14 @@ class FileFactory {
 		this.copyright = this.processString(gConfig.getCopyright(), false, true);
 		let fullClassNameInput = await FileFactory.PrettyInputBox("Class name", "Enter class name (e.g. SomeClass / MyNamespace::MyOtherNamespace::SomeClass)");
 		if (fullClassNameInput === undefined) return;
+		
 		let fullClassName = String(fullClassNameInput);
+		const reNameValidator = /(?:(?:(?:[A-Za-z_]\w*)+::).*)?(?:[A-Za-z_]\w*)+/g
+		if (!reNameValidator.test(fullClassName)) {
+			vscode.window.showErrorMessage("C++ class geerator: invalid characters in class name");
+			return;
+		}
+
 		let namespaceSeparatorPos = fullClassName.lastIndexOf("::");
 		if (namespaceSeparatorPos != -1) {
 			this.namespaceName = fullClassName.slice(0, namespaceSeparatorPos);
