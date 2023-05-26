@@ -15,7 +15,7 @@
   ],
   "publisher": "k4li",
   "activationEvents": [
-    "onCommand:cpp-class-generator.createClass"
+    "onStartupFinished"
   ],
   "main": "./out/main.js",
   "contributes": {
@@ -55,7 +55,7 @@
           ],
           "description": "Files copyright"
         },
-        "cpp-class-generator.templates.date-format": {
+        "cpp-class-generator.date-format": {
           "type": "string",
           "enum": [
             "DD-MM-YYYY",
@@ -80,73 +80,68 @@
           "default": "DD.MM.YYYY",
           "description": "File date format"
         },
-        "cpp-class-generator.templates.header-extension": {
-          "type": "string",
-          "enum": [
-            ".h",
-            ".hpp",
-            ".hh"
-          ],
-          "default": ".h",
-          "description": "Header file extension"
-        },
-        "cpp-class-generator.templates.single-header-extension": {
-          "type": "string",
-          "enum": [
-            ".h",
-            ".hpp",
-            ".hh"
-          ],
-          "default": ".hpp",
-          "description": "Single header file extension"
-        },
-        "cpp-class-generator.templates.source-extension": {
-          "type": "string",
-          "enum": [
-            ".cpp",
-            ".cxx",
-            ".cc"
-          ],
-          "default": ".cpp",
-          "description": "Source code file extension"
-        },
-        "cpp-class-generator.templates.header": {
-          "type": ["array", "object"],
-          "default": [
-            "{copyright}",
-            "#pragma once",
-            "",
-            "{namespaceStart}",
-            "{namespaceTab}// {className}",
-            "{namespaceTab}class {className} {",
-            "{namespaceTab}};",
-            "{namespaceEnd}",
-            ""
-          ],
-          "description": "Header file template"
-        },
-        "cpp-class-generator.templates.header-only": {
-          "type": ["array", "object"],
-          "default": [],
-          "description": "File template for header-only classes"
-        },
-        "cpp-class-generator.templates.source": {
-          "type": ["array", "object"],
-          "default": [
-            "{copyright}",
-            "#include \"{headerFileName}\"",
-            ""
-          ],
-          "description": "Source code file template"
-        },
-        "cpp-class-generator.templates.default-file-scheme": {
-          "type": "string",
-          "default": "Separated Header/Source files",
-          "enum": [
-            "Separated Header/Source files",
-            "Single file"
-          ],
-          "description": "Default generated file scheme"
+        "cpp-class-generator.templates": {
+          "type": "array",
+          "scope": "resource",
+          "description": "C++ class file templates",
+          "items": {
+            "type": "object",
+            "description": "C++ class template",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of class template"
+              },
+              "header": {
+                "type": [
+                  "string",
+                  "array"
+                ],
+                "description": "Header content or name of other template"
+              },
+              "source": {
+                "type": [
+                  "string",
+                  "array",
+                  "null"
+                ],
+                "default": null,
+                "description": "Source content or name of other template. When null class is single-header"
+              },
+              "header_extension": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  ".h",
+                  ".hpp",
+                  ".hh",
+                  ".hxx"
+                ],
+                "default": null,
+                "description": "Extension of header file. When null used .h for separated source/header classes and .hpp for single-header classes"
+              },
+              "source_extension": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  ".cpp",
+                  ".cc",
+                  ".cxx",
+                  ".c"
+                ],
+                "default": null,
+                "description": "Extension of source file. When null used .cpp"
+              }
+            },
+            "required": [
+              "name",
+              "header"
+            ]
+          }
         }
       }
     }

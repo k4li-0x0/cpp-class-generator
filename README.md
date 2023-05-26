@@ -26,6 +26,38 @@ Contributions are welcome
 
 {headerFileName} - specified name with header extension
 
+## Config example
+
+```json
+"cpp-class-generator.templates": [
+    {
+        "name": "Header-only class",
+        "header": [
+            "{copyright}",
+            "",
+            "#pragma once",
+            "",
+            "{namespaceStart}",
+            "{namespaceTab}class {className} {",
+            "{namespaceTab}};",
+            "{namespaceEnd}"
+        ]
+    },
+    {
+        "name": "Separated source/header class",
+        "header": "Header-only class", // Reference to header in other template
+        "source": [
+            "{copyright}",
+            "",
+            "#include \"{headerFileName}\"",
+            ""
+        ] 
+    }
+]
+```
+
+Configs from global and local settings will be merged - you can add main classes in global settings and project-specific classes in workspace settings, without duplicates.
+
 ## Current version - [v1.0.0] - 05.11.2022 (Release 🥳)
 
 ### Added

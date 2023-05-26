@@ -8,8 +8,10 @@ import {
 	TextEncoder
 } from 'util';
 import * as vscode from 'vscode';
+import { Config } from './config';
 
 const gClock: Date = new Date();
+const gConfig: Config = new Config;
 
 interface FileTemplate {
 	string: string;
@@ -18,7 +20,6 @@ interface FileTemplate {
 
 class FileFactory {
 	private static encoder = new TextEncoder();
-	private static config = vscode.workspace.getConfiguration("cpp-class-generator");
 	private username: string = "User";
 	private copyright: string = "";
 	private namespaceName: string = "";
@@ -26,50 +27,8 @@ class FileFactory {
 	private headerName: string = "";
 	private sourceName: string = "";
 
-	private static UpdateConfig()
-	{
-		FileFactory.config = vscode.workspace.getConfiguration("cpp-class-generator");
-	}
-
-	private static getParameterFromConfig(name: string): unknown {
-		return FileFactory.config.get(name);
-	}
-
-	private static getStringParameterFromConfig(name: string): string {
-		let result = FileFactory.getParameterFromConfig(name);
-		if (result === null || result === undefined) return "";
-		return String(result);
-	}
-
-	private static async getTemplateFromConfig(name: string, templ = ""): Promise<FileTemplate> {
-		let result = FileFactory.getParameterFromConfig(name);
-		if (result === null || result === undefined) return { string: "", templ: templ };
-		if (Array.isArray(result)) {
-			if (templ.length != 0) return { string: "", templ: templ };
-			return { string: result.join('\n'), templ: templ };
-		}
-		let templates = new Map<string, Array<any>>(Object.entries(result as Object));
-		if (templ.length == 0) {
-			let templPick = await FileFactory.PrettyQuickPick(
-				Array.from(templates.keys()),
-				{
-					canPickMany: false,
-					title: "Choose class template",
-					placeHolder: "Template for class"
-				}
-			);
-			if (typeof templPick === 'string')
-				templ = templPick;
-			else
-				return { string: "", templ: templ };
-		}
-		let data = templates.get(templ);
-		if (data === null || data === undefined) return { string: "", templ: templ };
-		return { string: data.join('\n'), templ: templ };
-	}
-
 	private static getDate(): string {
-		let date: string = FileFactory.getStringParameterFromConfig("templates.date-format");
+		let date = gConfig.getDateFormat();
 		let yyyy = gClock.getFullYear().toString();
 		let yy = yyyy.slice(yyyy.length - 2);
 		let mm = (gClock.getMonth() + 1).toString().padStart(2, '0');
@@ -138,15 +97,26 @@ class FileFactory {
 	 * CreateFile
 	 */
 	public async CreateFile(path: vscode.Uri) {
-		FileFactory.UpdateConfig();
-		this.username = FileFactory.getStringParameterFromConfig("user.name");
+		let templates = await gConfig.getAvailableNames();
+		if (templates === undefined) {
+			vscode.window.showErrorMessage("C++ class geerator: no any template present");
+			return;
+		}
+		this.username = gConfig.getUserName();
 		if (this.username === "") {
 			this.username = userInfo().username;
 		}
-		this.copyright = this.processString((await FileFactory.getTemplateFromConfig("project.copyright")).string,false, true);
+		this.copyright = this.processString(gConfig.getCopyright(), false, true);
 		let fullClassNameInput = await FileFactory.PrettyInputBox("Class name", "Enter class name (e.g. SomeClass / MyNamespace::MyOtherNamespace::SomeClass)");
 		if (fullClassNameInput === undefined) return;
+		
 		let fullClassName = String(fullClassNameInput);
+		const reNameValidator = /(?:(?:(?:[A-Za-z_]\w*)+::).*)?(?:[A-Za-z_]\w*)+/g
+		if (!reNameValidator.test(fullClassName)) {
+			vscode.window.showErrorMessage("C++ class geerator: invalid characters in class name");
+			return;
+		}
+
 		let namespaceSeparatorPos = fullClassName.lastIndexOf("::");
 		if (namespaceSeparatorPos != -1) {
 			this.namespaceName = fullClassName.slice(0, namespaceSeparatorPos);
@@ -157,53 +127,47 @@ class FileFactory {
 		const filenameInput = await FileFactory.PrettyInputBox("Filename", "Enter filename without extension", this.className);
 		if (filenameInput === undefined) return;
 		let filename = String(filenameInput);
-		let isSingleFilePick = await FileFactory.PrettyQuickPick(
-			["Default", "Separated Header/Source files", "Single file"],
+		let templPick = await FileFactory.PrettyQuickPick(
+			templates,
 			{
 				canPickMany: false,
-				title: "Choose which files will be created",
-				placeHolder: "One file or two files?"
+				title: "Choose class template",
+				placeHolder: "Template for class"
 			}
 		);
-		if ((isSingleFilePick === undefined) ||
-			(isSingleFilePick === "Default"))
-			isSingleFilePick = FileFactory.getStringParameterFromConfig("templates.default-file-scheme");
-		let isSingleFile = (isSingleFilePick === "Single file");
+		if (typeof templPick !== 'string')
+			return;
+		let template = await gConfig.getTemplate(templPick);
+		if (template === undefined) {
+			vscode.window.showErrorMessage("C++ class geerator: template is undefined");
+			return;
+		}
+		let isSingleFile = !Array.isArray(template.source);
 		let sourcePath = path.path;
 		if (sourcePath === "") return;
 
-		let headerExt = FileFactory.getStringParameterFromConfig("templates.header-extension");
-		let sourceExt = FileFactory.getStringParameterFromConfig("templates.source-extension");
-		let singleHeaderExt = FileFactory.getStringParameterFromConfig("templates.single-header-extension");
+		let headerExt = template.header_extension === undefined ? ".h" : template.header_extension;
+		let sourceExt = template.source_extension === undefined ? ".cpp" : template.source_extension;
+		let singleHeaderExt = template.header_extension === undefined ? ".hpp" : template.header_extension;
+		let headerFileTemplate = (template.header as Array<string>).join('\n');
 		this.sourceName = `${filename}${sourceExt}`;
 
 		// Create files
 		if (!isSingleFile) {
-			let headerFileTemplate = await FileFactory.getTemplateFromConfig("templates.header");
-			let sourceFileTemplate = await FileFactory.getTemplateFromConfig("templates.source", headerFileTemplate.templ);
-			if (headerFileTemplate.string.length == 0 || sourceFileTemplate.string.length == 0) {
-				vscode.window.showInformationMessage("C++ class not generated: invalid template");
-				return;
-			}
+			let sourceFileTemplate = (template.source as Array<string>).join('\n');
 			this.headerName = `${filename}${headerExt}`;
 			let headerfile = this.processString(
-				headerFileTemplate.string,
+				headerFileTemplate,
 				true);
 			FileFactory.ProcessFile(path.path, filename, headerExt, headerfile);
 			let sourcefile = this.processString(
-				sourceFileTemplate.string,
+				sourceFileTemplate,
 				false);
 			FileFactory.ProcessFile(path.path, filename, sourceExt, sourcefile);
 		} else {
 			this.headerName = `${filename}${singleHeaderExt}`;
-			let headerFileTemplate = await FileFactory.getTemplateFromConfig("templates.header-only");
-			if (headerFileTemplate.string.length == 0) headerFileTemplate = await FileFactory.getTemplateFromConfig("templates.header");
-			if (headerFileTemplate.string.length == 0) {
-				vscode.window.showInformationMessage("C++ class not generated: invalid template");
-				return;
-			}
 			let headerfile = this.processString(
-				headerFileTemplate.string,
+				headerFileTemplate,
 				true);
 			FileFactory.ProcessFile(path.path, filename, singleHeaderExt, headerfile);
 		}
@@ -219,7 +183,7 @@ export function activate(context: vscode.ExtensionContext) {
 		factory.CreateFile(path);
 	});
 
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(disposable, gConfig);
 }
 
 // this method is called when your extension is deactivated
