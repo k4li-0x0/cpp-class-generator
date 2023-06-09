@@ -11,6 +11,7 @@ export class Config {
         "// Created by {userName} on {date} ",
         "//"
     ];
+    private cmakeConfigure: boolean = false;
 
     constructor() {
         this.reload();
@@ -32,6 +33,7 @@ export class Config {
         this.dateFormat = config.get('date-format', this.dateFormat);
         this.copyright = config.get<Array<string>>('project.copyright', this.copyright);
         this.userName = config.get('user.name', this.userName);
+        this.cmakeConfigure = config.get('cmake.configure', this.cmakeConfigure);
 
         this.templates.clear();
         // Merge global and local configs
@@ -237,5 +239,9 @@ export class Config {
 
     public getCopyright(): string {
         return this.copyright.join('\n');
+    }
+
+    public isNeedConfigureCmake(): boolean {
+        return this.cmakeConfigure;
     }
 }
