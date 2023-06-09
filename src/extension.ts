@@ -9,6 +9,7 @@ import {
 } from 'util';
 import * as vscode from 'vscode';
 import { Config } from './config';
+import * as api from 'vscode-cmake-tools';
 
 const gClock: Date = new Date();
 const gConfig: Config = new Config;
@@ -93,6 +94,17 @@ class FileFactory {
 		return Promise.resolve(pick);
 	}
 
+	private static async CmakeConfigure(uri: vscode.Uri) {
+		const workspace = vscode.workspace.getWorkspaceFolder(uri);
+		if (workspace === undefined) return;
+
+		api.getCMakeToolsApi(api.Version.v1).then(api => {
+			api?.getProject(workspace.uri).then(project => {
+				project?.configure();
+			});
+		});
+	}
+
 	/**
 	 * CreateFile
 	 */
@@ -171,6 +183,7 @@ class FileFactory {
 				true);
 			FileFactory.ProcessFile(path.path, filename, singleHeaderExt, headerfile);
 		}
+		if (gConfig.isNeedConfigureCmake()) FileFactory.CmakeConfigure(path);
 		vscode.window.showInformationMessage("C++ class generator: Done!");
 	}
 };
