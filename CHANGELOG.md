@@ -1,5 +1,11 @@
 # Changelog
 
+## [v1.0.1] - 16.08.2024
+
+### Added
+
+ - {year} variable [Issue#17](https://github.com/k4li-0x0/cpp-class-generator/issues/17)
+
 ## [v1.0.0] - 05.11.2022 (Release 🥳)
 
 ### Added
