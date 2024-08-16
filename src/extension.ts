@@ -45,6 +45,7 @@ class FileFactory {
 		let result = source;
 		result = result.replace(/{userName}/g, this.username);
 		result = result.replace(/{date}/g, FileFactory.getDate());
+		result = result.replace(/{year}/g, gClock.getFullYear().toString());
 		if (isCopyright) return result;
 		result = result.replace(/{copyright}/g, this.copyright);
 		if (this.namespaceName! !== "") {
